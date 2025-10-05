@@ -34,28 +34,47 @@ class RushHourPuzzle:
       self.setBoard()
 
 
-  def setBoard(self):
-   self.board=[[' ' for _ in range(self.board_widht)] for _ in range(self.board_height)]
+def setBoard(self):
+    board = []
+    for y in range(self.board_height):
+        ligne = []
+        for x in range(self.board_width):
+            ligne.append(' ')
+        board.append(ligne)
+    self.board = board
 
-   for wall in self.walls:
+    for x, y in self.walls:
         self.board[y][x] = '#'
 
-   for v in self.vehicles:
-     id=v["id"]
-     x=v["x"]
-     y=v["y"]
+    for v in self.vehicles:
+        vid = v["id"]
+        x = v["x"]
+        y = v["y"]
+        orientation = v["orientation"]
+        length = v["length"]
 
-     orientation=v["orientation"]
-     length=v["length"]
-     for i in range(length):
-        if orientation=="H":
-           self.board[y][x+i]=id
-        else:
-           self.board[y+i][x]=id
+        for i in range(length):
+            if orientation == "H":
+                self.board[y][x + i] = vid
+            else:
+                self.board[y + i][x] = vid
+
+def isGoal(self):
+    for v in self.vehicles:
+        if v["id"] == "X":
+            if v["orientation"] == "H":
+                last_x = v["x"] + v["length"] - 1
+                if last_x == self.board_width - 1:
+                    return True
+    return False
 
 
+def successorFunction(self):
 
-     
+   successor=[]
+   
+   
+   
 
 
 
