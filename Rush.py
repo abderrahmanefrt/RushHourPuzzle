@@ -140,13 +140,13 @@ class Node:
         while node is not None:
             path.append(node.state)
             node=node.parent
+            path.reverse()
 
         return path
     
     def getSolution(self):
         actions=[]
         node=self
-        node = self
         while node.parent is not None:
             actions.append(node.action)
             node = node.parent
