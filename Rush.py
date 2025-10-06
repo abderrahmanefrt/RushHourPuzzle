@@ -167,7 +167,7 @@ def bfs(initial_state):
                 child = Node(state=new_state, parent=node, action=action, g=node.g + 1)
 
                 if new_state.isGoal():
-                    print("✅ Goal found!")
+                    print(" Goal found!")
                     return child
 
                 queue.append(child)
@@ -190,10 +190,10 @@ if __name__ == "__main__":
     solution_node = bfs(place)
 
     if solution_node:
-        print("\n Solution trouvée en", solution_node.g, "mouvements :")
-        print(" Séquence d’actions :", solution_node.getSolution())
+        print("\n Solution found ", solution_node.g, "mouvements :")
+        print(" actions :", solution_node.getSolution())
 
-        print("\n États du chemin :")
+        print("\n  chemin :")
         for state in solution_node.getPath():
             state.showBoard()
     else:
