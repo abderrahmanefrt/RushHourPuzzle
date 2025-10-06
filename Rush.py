@@ -122,7 +122,7 @@ class Node:
         while node is not None:
             path.append(node.state)
             node=node.parent
-            path.reverse()
+        path.reverse()
 
         return path
     
@@ -142,59 +142,3 @@ class Node:
 
 
 
-def bfs(initial_state):
-    root = Node(state=initial_state, parent=None, action=None, g=0)
-
-    if initial_state.isGoal():
-        return root
-
-    queue = deque([root])
-    visited = [initial_state.board]  
-
-    while queue:
-        node = queue.popleft()
-
-        # Successeurs
-        for action, new_state in node.state.successorFunction():
-            
-            is_new = True
-            for b in visited:
-                if new_state.board == b: 
-                    is_new = False
-                    break
-
-            if is_new:
-                child = Node(state=new_state, parent=node, action=action, g=node.g + 1)
-
-                if new_state.isGoal():
-                    print(" Goal found!")
-                    return child
-
-                queue.append(child)
-                visited.append(copy.deepcopy(new_state.board))  
-
-    print(" No solution found.")
-    return None
-
-
-
-if __name__ == "__main__":
-    place = RushHourPuzzle(0, 0, [], [], [])
-    place.setVehicles("1.csv")
-
-    print("Plateau initial :")
-    place.showBoard()
-
-    
-    print("\n solution avec BFS...")
-    solution_node = bfs(place)
-
-    if solution_node:
-        print("\n Solution found ", solution_node.g, "mouvements :")
-        print(" actions :", solution_node.getSolution())
-
-        print("\n  chemin :")
-        for state in solution_node.getPath():
-            state.showBoard()
-    else:
-        print(" Aucune solution trouvée.")
