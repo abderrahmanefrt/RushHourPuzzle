@@ -113,7 +113,6 @@ class Node:
         self.parent=parent
         self.action=action
         self.g=g
-        self.f=f
 
     def getPath(self):
         path=[]
@@ -173,7 +172,7 @@ class Search:
                     print(f" Temps d'exécution : {timex:.4f} secondes\n")
                     return child.getSolution()
 
-                if not self._in_list(child, open) and not self._in_list(child, closed):
+                if not self._identique(child, open) and not self._identique(child, closed):
                     open.append(child)
 
         timex = time.time() - start_time
@@ -182,7 +181,7 @@ class Search:
         print(f" Temps d'exécution : {timex:.4f} secondes\n")
         return None
 
-    def _in_list(self, node, node_list):
+    def _identique(self, node, node_list):
         """Vérifie si un état identique existe déjà dans une liste de nœuds."""
         for n in node_list:
             if self._same_state(n.state, node.state):
@@ -195,6 +194,9 @@ class Search:
             if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
                 return False
         return True
+
+
+
 
 
 
