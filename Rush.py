@@ -142,36 +142,29 @@ class Search:
         self.initial_state = initial_state
 
     def BFS(self):
-        # 1. Créer le nœud initial
         init_node = Node(self.initial_state, None, None)
 
-        # Si déjà à l'état but
         if self.initial_state.isGoal():
             return init_node.getSolution()
 
-        # 2. Initialiser les structures
-        open_list = deque([init_node])
-        closed_list = []
+        open = deque([init_node])
+        closed = []
 
-        # 3. Boucle principale
-        while open_list:
-            current = open_list.popleft()  # retirer le premier élément (FIFO)
-            closed_list.append(current)
+        while open:
+            current = open.popleft()  
+            closed.append(current)
 
-            # 4. Générer les successeurs
             for (action, state) in current.state.successorFunction():
                 child = Node(state, current, action)
 
-                # Vérifier si le but est atteint
                 if child.state.isGoal():
-                    print("✅ Solution trouvée !")
+                    print(" Solution trouvée !")
                     return child.getSolution()
 
-                # Vérifier si déjà visité
-                if not self._in_list(child, open_list) and not self._in_list(child, closed_list):
-                    open_list.append(child)
+                if not self._in_list(child, open) and not self._in_list(child, closed):
+                    open.append(child)
 
-        print("❌ Aucune solution trouvée.")
+        print(" Aucune solution trouvée.")
         return None
 
     def _in_list(self, node, node_list):
@@ -193,14 +186,14 @@ class Search:
 
 if __name__ == "__main__":
     puzzle = RushHourPuzzle(0, 0, [], [], [])
-    puzzle.setVehicles("1.csv")  # fichier CSV contenant ta configuration
+    puzzle.setVehicles("1.csv")  
 
     search = Search(puzzle)
     solution = search.BFS()
 
     if solution:
-        print("Séquence d’actions :")
+        print("solution:")
         for step in solution:
             print(step)
     else:
-        print("Pas de solution trouvée.")
+        print("Pas de solution ")
