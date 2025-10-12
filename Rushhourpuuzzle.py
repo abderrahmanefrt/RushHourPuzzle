@@ -128,36 +128,3 @@ class RushHourPuzzle:
 
 
 
-    def successorFunction(self):
-    successors = []
-
-    for v in self.vehicles:
-        vid = v["id"]
-        x = v["x"]
-        y = v["y"]
-        orientation = v["orientation"]
-        length = v["length"]
-
-        if orientation == "H":
-            #  Déplacement vers la droite 
-            if x + length < self.board_width and self.board[y][x + length] == ' ':
-                new_state = self._moveVehicle(v, dx=1, dy=0)
-                successors.append(((vid, "forward"), new_state))
-
-            # Déplacement vers la gauche 
-            if x - 1 >= 0 and self.board[y][x - 1] == ' ':
-                new_state = self._moveVehicle(v, dx=-1, dy=0)
-                successors.append(((vid, "backward"), new_state))
-
-        elif orientation == "V":
-            # Déplacement vers le bas
-            if y + length < self.board_height and self.board[y + length][x] == ' ':
-                new_state = self._moveVehicle(v, dx=0, dy=1)
-                successors.append(((vid, "forward"), new_state))
-
-            # Déplacement vers le haut
-            if y - 1 >= 0 and self.board[y - 1][x] == ' ':
-                new_state = self._moveVehicle(v, dx=0, dy=-1)
-                successors.append(((vid, "backward"), new_state))
-
-    return successors

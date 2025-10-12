@@ -3,8 +3,6 @@ import copy
 from collections import deque
 
 
-
-
 class RushHourPuzzle: 
     def __init__(self, board_height, board_width, vehicles, walls, board):
         self.board_height = board_height
@@ -71,23 +69,23 @@ class RushHourPuzzle:
 
             if orientation == "H":
                 if x + length < self.board_width and self.board[y][x + length] == ' ':
-                    new_state = self._moveVehicle(v, dx=1, dy=0)
+                    new_state = self._deplacementVehicle(v, dx=1, dy=0)
                     successors.append(((vid, "forward"), new_state))
                 if x - 1 >= 0 and self.board[y][x - 1] == ' ':
-                    new_state = self._moveVehicle(v, dx=-1, dy=0)
+                    new_state = self._deplacementVehicle(v, dx=-1, dy=0)
                     successors.append(((vid, "backward"), new_state))
 
             elif orientation == "V":
                 if y + length < self.board_height and self.board[y + length][x] == ' ':
-                    new_state = self._moveVehicle(v, dx=0, dy=1)
+                    new_state = self._deplacementVehicle(v, dx=0, dy=1)
                     successors.append(((vid, "forward"), new_state))
                 if y - 1 >= 0 and self.board[y - 1][x] == ' ':
-                    new_state = self._moveVehicle(v, dx=0, dy=-1)
+                    new_state = self._deplacementVehicle(v, dx=0, dy=-1)
                     successors.append(((vid, "backward"), new_state))
 
         return successors
 
-    def _moveVehicle(self, vehicle, dx, dy):
+    def _deplacementVehicle(self, vehicle, dx, dy):
         new_puzzle = RushHourPuzzle(
             board_height=self.board_height,
             board_width=self.board_width,
@@ -189,3 +187,20 @@ class Search:
             if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
                 return False
         return True
+
+
+
+
+if __name__ == "__main__":
+    puzzle = RushHourPuzzle(0, 0, [], [], [])
+    puzzle.setVehicles("1.csv")  # fichier CSV contenant ta configuration
+
+    search = Search(puzzle)
+    solution = search.BFS()
+
+    if solution:
+        print("Séquence d’actions :")
+        for step in solution:
+            print(step)
+    else:
+        print("Pas de solution trouvée.")
