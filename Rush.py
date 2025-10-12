@@ -135,10 +135,57 @@ class Node:
         actions.reverse()
         return actions
     
-    def setF(self ,heuristic):
-        
-        self.f=self.g+heuristic(self.state)
+  
         
 
 
+class Search:
+    def __init__(self, initial_state):
+        self.initial_state = initial_state
 
+    def BFS(self):
+        # 1. Créer le nœud initial
+        init_node = Node(self.initial_state, None, None)
+
+        # Si déjà à l'état but
+        if self.initial_state.isGoal():
+            return init_node.getSolution()
+
+        # 2. Initialiser les structures
+        open_list = deque([init_node])
+        closed_list = []
+
+        # 3. Boucle principale
+        while open_list:
+            current = open_list.popleft()  # retirer le premier élément (FIFO)
+            closed_list.append(current)
+
+            # 4. Générer les successeurs
+            for (action, state) in current.state.successorFunction():
+                child = Node(state, current, action)
+
+                # Vérifier si le but est atteint
+                if child.state.isGoal():
+                    print("✅ Solution trouvée !")
+                    return child.getSolution()
+
+                # Vérifier si déjà visité
+                if not self._in_list(child, open_list) and not self._in_list(child, closed_list):
+                    open_list.append(child)
+
+        print("❌ Aucune solution trouvée.")
+        return None
+
+    def _in_list(self, node, node_list):
+        """Vérifie si un état identique existe déjà dans une liste de nœuds."""
+        for n in node_list:
+            if self._same_state(n.state, node.state):
+                return True
+        return False
+
+    def _same_state(self, s1, s2):
+        """Compare deux états du puzzle (positions des véhicules)."""
+        for v1, v2 in zip(s1.vehicles, s2.vehicles):
+            if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
+                return False
+        return True
