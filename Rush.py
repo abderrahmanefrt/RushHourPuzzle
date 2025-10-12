@@ -1,6 +1,7 @@
 import csv
 import copy
 from collections import deque
+import time
 
 
 class RushHourPuzzle: 
@@ -137,34 +138,48 @@ class Node:
         
 
 
+
+
+
 class Search:
     def __init__(self, initial_state):
         self.initial_state = initial_state
 
     def BFS(self):
+        start_time = time.time()  
+        counter = 0
+
         init_node = Node(self.initial_state, None, None)
 
         if self.initial_state.isGoal():
+            print("Temps écoulé : {:.4f} secondes".format(time.time() - start_time))
+            print("Nombre d'étapes explorées : 0")
             return init_node.getSolution()
 
         open = deque([init_node])
         closed = []
 
         while open:
-            current = open.popleft()  
+            current = open.popleft()
             closed.append(current)
+            counter += 1 
 
             for (action, state) in current.state.successorFunction():
                 child = Node(state, current, action)
 
                 if child.state.isGoal():
-                    print(" Solution trouvée !")
+                    timex = time.time() - start_time
+                    print(f" Nombre d'étapes explorées : {counter}")
+                    print(f" Temps d'exécution : {timex:.4f} secondes\n")
                     return child.getSolution()
 
                 if not self._in_list(child, open) and not self._in_list(child, closed):
                     open.append(child)
 
-        print(" Aucune solution trouvée.")
+        timex = time.time() - start_time
+        print("\nAucune solution trouvée.")
+        print(f" Nombre d'étapes explorées : {counter}")
+        print(f" Temps d'exécution : {timex:.4f} secondes\n")
         return None
 
     def _in_list(self, node, node_list):
@@ -180,6 +195,7 @@ class Search:
             if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
                 return False
         return True
+
 
 
 
