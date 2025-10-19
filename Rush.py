@@ -188,7 +188,6 @@ class Search:
         return False
 
     def _same_state(self, s1, s2):
-        """Compare deux états du puzzle (positions des véhicules)."""
         for v1, v2 in zip(s1.vehicles, s2.vehicles):
             if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
                 return False
