@@ -182,7 +182,6 @@ class Search:
         return None
 
     def _identique(self, node, node_list):
-        """Vérifie si un état identique existe déjà dans une liste de nœuds."""
         for n in node_list:
             if self._same_state(n.state, node.state):
                 return True
