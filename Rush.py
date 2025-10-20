@@ -151,7 +151,7 @@ class Search:
         init_node = Node(self.initial_state, None, None)
 
         if self.initial_state.isGoal():
-            print("Temps écoulé : {:.4f} secondes".format(time.time() - start_time))
+            print("Temps  : {:.4f} secondes".format(time.time() - start_time))
             print("Nombre d'étapes explorées : 0")
             return init_node.getSolution()
 
@@ -180,7 +180,6 @@ class Search:
         print(f" Nombre d'étapes explorées : {counter}")
         print(f" Temps d'exécution : {timex:.4f} secondes\n")
         return None
-
     def _identique(self, node, node_list):
         for n in node_list:
             if self._same_state(n.state, node.state):
@@ -202,7 +201,7 @@ class Search:
 
 if __name__ == "__main__":
     puzzle = RushHourPuzzle(0, 0, [], [], [])
-    puzzle.setVehicles("1.csv")  
+    puzzle.setVehicles("2-c.csv")  
 
     search = Search(puzzle)
     solution = search.BFS()
