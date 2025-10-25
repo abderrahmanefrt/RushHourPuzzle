@@ -193,7 +193,6 @@ class Search:
         counter = 0
         counter_id = itertools.count()  
 
-        # --- initialisation ---
         init_node = Node(self.initial_state)
         init_node.g = 0
         init_node.f = self._heuristic(init_node.state, heuristic)
