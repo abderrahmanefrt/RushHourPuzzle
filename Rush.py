@@ -207,7 +207,7 @@ class Search:
 
             if current.state.isGoal():
                 timex = time.time() - start_time
-                print(f"✅ A* ({heuristic}) : solution trouvée en {timex:.4f}s, {counter} étapes explorées")
+                print(f" A* ({heuristic}) : solution trouvée en {timex:.4f}s, {counter} étapes explorées")
                 return current.getSolution()
 
             closed_list.append(current)
@@ -235,7 +235,7 @@ class Search:
                     closed_list.remove(closed_match)
                     heapq.heappush(open_list, (child.f, next(counter_id), child))
 
-        print(f"❌ Aucune solution trouvée avec A* ({heuristic}) après {counter} étapes")
+        print(f" Aucune solution trouvée avec A* ({heuristic}) après {counter} étapes")
         return None
 
 
