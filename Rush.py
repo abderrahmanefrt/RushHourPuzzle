@@ -3,9 +3,10 @@ import copy
 from collections import deque
 import time
 import heapq
+import itertools
 
 
-class RushHourPuzzle: 
+class RushHourPuzzle:
     def __init__(self, board_height, board_width, vehicles, walls, board):
         self.board_height = board_height
         self.board_width = board_width
@@ -14,8 +15,10 @@ class RushHourPuzzle:
         self.board = []
 
     def setVehicles(self, csv_file):
+        """Charge les véhicules et les murs depuis un fichier CSV."""
         self.vehicles = []
         self.walls = []
+
         with open(csv_file, newline='') as csvfile:
             read = csv.reader(csvfile)
             ligne1 = next(read)
@@ -39,9 +42,11 @@ class RushHourPuzzle:
         board = [[' ' for _ in range(self.board_width)] for _ in range(self.board_height)]
         self.board = board
 
+      
         for x, y in self.walls:
             self.board[y][x] = '#'
 
+        
         for v in self.vehicles:
             vid = v["id"]
             x = v["x"]
@@ -104,40 +109,39 @@ class RushHourPuzzle:
         return new_puzzle
 
     def showBoard(self):
+        """Affiche le plateau de jeu."""
         for row in self.board:
             print(" ".join(row))
         print("-" * (2 * self.board_width - 1))
 
+
+
 class Node:
-    def __init__(self,state,parent=None,action=None, g=0,f=0):
-        self.state=state
-        self.parent=parent
-        self.action=action
-        self.g=g
+    def __init__(self, state, parent=None, action=None, g=0, f=0):
+        self.state = state
+        self.parent = parent
+        self.action = action
+        self.g = g
+        self.f = f
 
     def getPath(self):
-        path=[]
-        node=self
+        """Retourne le chemin complet jusqu’à ce nœud."""
+        path = []
+        node = self
         while node is not None:
             path.append(node.state)
-            node=node.parent
+            node = node.parent
         path.reverse()
-
         return path
-    
+
     def getSolution(self):
-        actions=[]
-        node=self
+        actions = []
+        node = self
         while node.parent is not None:
             actions.append(node.action)
             node = node.parent
         actions.reverse()
         return actions
-    
-  
-        
-
-
 
 
 
@@ -145,8 +149,9 @@ class Search:
     def __init__(self, initial_state):
         self.initial_state = initial_state
 
+
     def BFS(self):
-        start_time = time.time()  
+        start_time = time.time()
         counter = 0
 
         init_node = Node(self.initial_state, None, None)
@@ -162,7 +167,7 @@ class Search:
         while open:
             current = open.popleft()
             closed.append(current)
-            counter += 1 
+            counter += 1
 
             for (action, state) in current.state.successorFunction():
                 child = Node(state, current, action)
@@ -181,47 +186,33 @@ class Search:
         print(f" Nombre d'étapes explorées : {counter}")
         print(f" Temps d'exécution : {timex:.4f} secondes\n")
         return None
-    def _identique(self, node, node_list):
-        for n in node_list:
-            if self._same_state(n.state, node.state):
-                return True
-        return False
 
-    def _same_state(self, s1, s2):
-        for v1, v2 in zip(s1.vehicles, s2.vehicles):
-            if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
-                return False
-        return True
-    
+    # A*
     def AStar(self, heuristic="h1"):
-        """
-        Algorithme A* conforme au pseudocode du cours.
-        Open : priorityQueue triée par f = g + h
-        Closed : liste
-        """
         start_time = time.time()
         counter = 0
+        counter_id = itertools.count()  
 
         # --- initialisation ---
         init_node = Node(self.initial_state)
         init_node.g = 0
         init_node.f = self._heuristic(init_node.state, heuristic)
+
         open_list = []
-        heapq.heappush(open_list, (init_node.f, init_node))
+        heapq.heappush(open_list, (init_node.f, next(counter_id), init_node))
         closed_list = []
 
-        # --- boucle principale ---
         while open_list:
-            _, current = heapq.heappop(open_list)  # Choose the node with the lowest f
+            _, _, current = heapq.heappop(open_list)
             counter += 1
 
             if current.state.isGoal():
-                print(f"✅ A* ({heuristic}) : solution trouvée en {time.time()-start_time:.4f}s, {counter} étapes")
+                timex = time.time() - start_time
+                print(f"✅ A* ({heuristic}) : solution trouvée en {timex:.4f}s, {counter} étapes explorées")
                 return current.getSolution()
 
             closed_list.append(current)
 
-            # pour chaque successeur
             for (action, successor) in current.state.successorFunction():
                 child = Node(successor, current, action)
                 child.g = current.g + self._cost(current, action, successor)
@@ -230,30 +221,28 @@ class Search:
                 open_match = self._find_in_list(open_list, child)
                 closed_match = self._find_in_list(closed_list, child)
 
-                # Cas 1 : ni dans Open ni dans Closed → on insère
                 if not open_match and not closed_match:
-                    heapq.heappush(open_list, (child.f, child))
+                    heapq.heappush(open_list, (child.f, next(counter_id), child))
 
-                # Cas 2 : même état dans Open avec un f plus grand → on remplace
                 elif open_match and child.f < open_match.f:
-                    open_list.remove((open_match.f, open_match))
-                    heapq.heapify(open_list)
-                    heapq.heappush(open_list, (child.f, child))
+                    for i, item in enumerate(open_list):
+                        if isinstance(item, tuple) and item[2] == open_match:
+                            del open_list[i]
+                            heapq.heapify(open_list)
+                            break
+                    heapq.heappush(open_list, (child.f, next(counter_id), child))
 
-                # Cas 3 : même état dans Closed avec un f plus grand → on déplace vers Open
                 elif closed_match and child.f < closed_match.f:
                     closed_list.remove(closed_match)
-                    heapq.heappush(open_list, (child.f, child))
+                    heapq.heappush(open_list, (child.f, next(counter_id), child))
 
-        print(f"❌ Aucune solution trouvée ({heuristic}) après {counter} étapes")
+        print(f"❌ Aucune solution trouvée avec A* ({heuristic}) après {counter} étapes")
         return None
 
-    # --- fonction de coût c(current, action, successor) ---
+
     def _cost(self, current, action, successor):
-        # coût unitaire comme dans le projet (chaque déplacement = 1)
         return 1
 
-    # --- heuristiques h1, h2, h3 ---
     def _heuristic(self, state, type="h1"):
         red = next(v for v in state.vehicles if v["id"] == "X")
         distance = (state.board_width - 1) - (red["x"] + red["length"] - 1)
@@ -276,30 +265,32 @@ class Search:
             return distance + blockers
         return 0
 
-    # --- comparaison d’états ---
+    def _identique(self, node, node_list):
+        for n in node_list:
+            if isinstance(n, tuple):
+                n = n[2]
+            if self._same_state(n.state, node.state):
+                return True
+        return False
+
+    def _find_in_list(self, lst, node):
+        for item in lst:
+            n = item[2] if isinstance(item, tuple) else item
+            if self._same_state(n.state, node.state):
+                return n
+        return None
+
     def _same_state(self, s1, s2):
         for v1, v2 in zip(s1.vehicles, s2.vehicles):
             if v1["id"] != v2["id"] or v1["x"] != v2["x"] or v1["y"] != v2["y"]:
                 return False
         return True
 
-    def _find_in_list(self, lst, node):
-        # recherche d’un état identique dans Open ou Closed
-        for item in lst:
-            n = item[1] if isinstance(item, tuple) else item
-            if self._same_state(n.state, node.state):
-                return n
-        return None
-
-
-
-
-
 
 
 if __name__ == "__main__":
     puzzle = RushHourPuzzle(0, 0, [], [], [])
-    puzzle.setVehicles("2-c.csv")
+    puzzle.setVehicles("1.csv")
 
     search = Search(puzzle)
 
@@ -314,4 +305,3 @@ if __name__ == "__main__":
 
     print("\n===== 🔴 A* avec h3 =====")
     a3_solution = search.AStar("h3")
-
