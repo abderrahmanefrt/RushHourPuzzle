@@ -42,11 +42,9 @@ class RushHourPuzzle:
         board = [[' ' for _ in range(self.board_width)] for _ in range(self.board_height)]
         self.board = board
 
-      
         for x, y in self.walls:
             self.board[y][x] = '#'
 
-        
         for v in self.vehicles:
             vid = v["id"]
             x = v["x"]
@@ -109,23 +107,20 @@ class RushHourPuzzle:
         return new_puzzle
 
     def showBoard(self):
-        """Affiche le plateau de jeu."""
         for row in self.board:
             print(" ".join(row))
         print("-" * (2 * self.board_width - 1))
 
 
-
 class Node:
-    def __init__(self, state, parent=None, action=None, g=0, f=0):
+    def __init__(self, state, parent=None, action=None):
+
         self.state = state
         self.parent = parent
         self.action = action
-        self.g = g
-        self.f = f
-
+        self.g = 0 if parent is None else parent.g + 1 
+        self.f = 0 
     def getPath(self):
-        """Retourne le chemin complet jusqu’à ce nœud."""
         path = []
         node = self
         while node is not None:
@@ -143,12 +138,17 @@ class Node:
         actions.reverse()
         return actions
 
+    def setF(self, h_value):
+        """Calcule la fonction f(n) = g(n) + h(n)."""
+        self.f = self.g + h_value
 
+    def __lt__(self, other):
+        """Compare deux nœuds selon leur valeur f (nécessaire pour heapq)."""
+        return self.f < other.f
 
 class Search:
     def __init__(self, initial_state):
         self.initial_state = initial_state
-
 
     def BFS(self):
         start_time = time.time()
@@ -187,15 +187,14 @@ class Search:
         print(f" Temps d'exécution : {timex:.4f} secondes\n")
         return None
 
-    # A*
     def AStar(self, heuristic="h1"):
         start_time = time.time()
         counter = 0
-        counter_id = itertools.count()  
+        counter_id = itertools.count()
 
         init_node = Node(self.initial_state)
-        init_node.g = 0
-        init_node.f = self._heuristic(init_node.state, heuristic)
+        h_value = self._heuristic(init_node.state, heuristic)
+        init_node.setF(h_value)
 
         open_list = []
         heapq.heappush(open_list, (init_node.f, next(counter_id), init_node))
@@ -214,8 +213,8 @@ class Search:
 
             for (action, successor) in current.state.successorFunction():
                 child = Node(successor, current, action)
-                child.g = current.g + self._cost(current, action, successor)
-                child.f = child.g + self._heuristic(successor, heuristic)
+                h_value = self._heuristic(successor, heuristic)
+                child.setF(h_value)
 
                 open_match = self._find_in_list(open_list, child)
                 closed_match = self._find_in_list(closed_list, child)
@@ -237,10 +236,6 @@ class Search:
 
         print(f" Aucune solution trouvée avec A* ({heuristic}) après {counter} étapes")
         return None
-
-
-    def _cost(self, current, action, successor):
-        return 1
 
     def _heuristic(self, state, type="h1"):
         red = next(v for v in state.vehicles if v["id"] == "X")
@@ -286,21 +281,20 @@ class Search:
         return True
 
 
-
 if __name__ == "__main__":
     puzzle = RushHourPuzzle(0, 0, [], [], [])
-    puzzle.setVehicles("1.csv")
+    puzzle.setVehicles("2-c.csv")
 
     search = Search(puzzle)
 
-    print("\n===== 🔵 BFS =====")
+    print("\n=====  BFS =====")
     bfs_solution = search.BFS()
 
-    print("\n===== 🟢 A* avec h1 =====")
+    print("\n=====  A* avec h1 =====")
     a1_solution = search.AStar("h1")
 
-    print("\n===== 🟠 A* avec h2 =====")
+    print("\n=====  A* avec h2 =====")
     a2_solution = search.AStar("h2")
 
-    print("\n===== 🔴 A* avec h3 =====")
+    print("\n=====  A* avec h3 =====")
     a3_solution = search.AStar("h3")

@@ -1,26 +1,25 @@
 import pygame
 import sys
 import time
-import itertools
-import heapq
 from Rush import RushHourPuzzle, Search
 
 # === PARAMÈTRES D’AFFICHAGE ===
 CELL_SIZE = 80
-MARGIN = 10
+MARGIN = 8
 FPS = 2
 
 # === COULEURS ===
-WHITE = (255, 255, 255)
+WHITE = (250, 250, 250)
 BLACK = (0, 0, 0)
-GRAY = (200, 200, 200)
+GRAY = (210, 210, 210)
+LIGHT_GRAY = (230, 230, 230)
 RED = (255, 80, 80)
 BLUE = (80, 150, 255)
 GREEN = (100, 255, 150)
-YELLOW = (255, 255, 100)
-ORANGE = (255, 160, 0)
-PURPLE = (160, 80, 255)
-CYAN = (0, 200, 200)
+YELLOW = (255, 255, 120)
+ORANGE = (255, 180, 80)
+PURPLE = (180, 100, 255)
+CYAN = (80, 220, 220)
 
 CAR_COLORS = {
     "X": RED,
@@ -32,15 +31,15 @@ CAR_COLORS = {
     "F": CYAN,
 }
 
-# === INTERFACE PYGAME ===
-def draw_board(screen, puzzle):
-    """Dessine le plateau et les véhicules."""
-    screen.fill(WHITE)
+
+# === AFFICHAGE DU PLATEAU ===
+def draw_board(screen, puzzle, offset_x=350, offset_y=50):
+    """Dessine le plateau avec décalage à droite."""
     for y in range(puzzle.board_height):
         for x in range(puzzle.board_width):
             rect = pygame.Rect(
-                x * CELL_SIZE + MARGIN,
-                y * CELL_SIZE + MARGIN,
+                offset_x + x * CELL_SIZE + MARGIN,
+                offset_y + y * CELL_SIZE + MARGIN,
                 CELL_SIZE - 2 * MARGIN,
                 CELL_SIZE - 2 * MARGIN,
             )
@@ -48,53 +47,70 @@ def draw_board(screen, puzzle):
             if cell == "#":
                 pygame.draw.rect(screen, BLACK, rect)
             elif cell == " ":
-                pygame.draw.rect(screen, GRAY, rect, 1)
+                pygame.draw.rect(screen, LIGHT_GRAY, rect, 1)
             else:
                 color = CAR_COLORS.get(cell, (120, 120, 255))
-                pygame.draw.rect(screen, color, rect)
-                pygame.draw.rect(screen, BLACK, rect, 2)
-    pygame.display.flip()
+                pygame.draw.rect(screen, color, rect, border_radius=10)
+                pygame.draw.rect(screen, BLACK, rect, 2, border_radius=10)
+
+    # Bordure du plateau
+    border_rect = pygame.Rect(
+        offset_x + MARGIN - 5,
+        offset_y + MARGIN - 5,
+        puzzle.board_width * CELL_SIZE - MARGIN + 10,
+        puzzle.board_height * CELL_SIZE - MARGIN + 10,
+    )
+    pygame.draw.rect(screen, BLACK, border_rect, 4, border_radius=10)
 
 
-def draw_menu(screen, font):
-    """Affiche les boutons du menu."""
+# === MENU LATERAL ===
+def draw_menu(screen, font, hover_index=None):
+    """Affiche les boutons du menu amélioré à gauche."""
     screen.fill(WHITE)
-    title = font.render("🚗 Rush Hour Puzzle", True, BLACK)
-    screen.blit(title, (CELL_SIZE * 1.5, 30))
+
+    # Titre
+    title = font.render(" Rush Hour Solver", True, BLACK)
+    screen.blit(title, (40, 40))
+
+    subtitle = pygame.font.SysFont("Arial", 22).render(
+        "Choisissez un algorithme :", True, (60, 60, 60)
+    )
+    screen.blit(subtitle, (60, 100))
 
     buttons = [
-        ("🔵 BFS", (100, 150)),
-        ("🟢 A* h1", (100, 250)),
-        ("🟠 A* h2", (100, 350)),
-        ("🔴 A* h3", (100, 450)),
-        ("❌ Quitter", (100, 550)),
+        (" BFS", (60, 160)),
+        (" A* (h1)", (60, 240)),
+        (" A* (h2)", (60, 320)),
+        (" A* (h3)", (60, 400)),
+        (" Réinitialiser", (60, 480)),
+        (" Quitter", (60, 560)),
     ]
+
     rects = []
-    for text, pos in buttons:
-        rect = pygame.Rect(pos[0], pos[1], 300, 60)
-        pygame.draw.rect(screen, GRAY, rect)
+    for i, (text, pos) in enumerate(buttons):
+        color = (180, 180, 180) if hover_index == i else (200, 200, 200)
+        rect = pygame.Rect(pos[0], pos[1], 220, 60)
+        pygame.draw.rect(screen, color, rect, border_radius=12)
         label = font.render(text, True, BLACK)
-        screen.blit(label, (pos[0] + 20, pos[1] + 10))
+        screen.blit(label, (pos[0] + 20, pos[1] + 12))
         rects.append((rect, text))
-    pygame.display.flip()
+
     return rects
 
 
+
 def animate_solution(puzzle, actions):
-    """Anime les mouvements de la solution trouvée."""
-    pygame.init()
-    screen_width = puzzle.board_width * CELL_SIZE
-    screen_height = puzzle.board_height * CELL_SIZE
+    """Anime la solution et laisse le plateau final affiché."""
+    screen_width = 900
+    screen_height = 650
     screen = pygame.display.set_mode((screen_width, screen_height))
-    pygame.display.set_caption("Rush Hour - Solution")
+    pygame.display.set_caption("Rush Hour Puzzle")
 
     clock = pygame.time.Clock()
-    draw_board(screen, puzzle)
-    time.sleep(1)
 
     for move in actions:
         vid, direction = move
-        print(f"🚗 {vid} -> {direction}")
+        print(f" {vid} -> {direction}")
 
         for v in puzzle.vehicles:
             if v["id"] == vid:
@@ -111,64 +127,93 @@ def animate_solution(puzzle, actions):
                 break
 
         puzzle.setBoard()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        draw_board(screen, puzzle)
+        screen.fill(WHITE)
+        draw_board(screen, puzzle, 350, 50)
+        pygame.display.flip()
         clock.tick(FPS)
 
-    print("✅ Solution terminée !")
-    time.sleep(2)
-    pygame.quit()
+    print(" Solution terminée ! (Plateau final affiché)")
 
 
+# === PROGRAMME PRINCIPAL ===
 def main_gui():
     pygame.init()
-    screen = pygame.display.set_mode((600, 700))
-    pygame.display.set_caption("Rush Hour Puzzle - Choix de l'algorithme")
-    font = pygame.font.SysFont("Arial", 30)
+    screen = pygame.display.set_mode((900, 650))
+    pygame.display.set_caption("Rush Hour Puzzle - Interface Graphique")
+    font = pygame.font.SysFont("Arial", 28)
 
-    puzzle = RushHourPuzzle(0, 0, [], [], [])
-    puzzle.setVehicles("1.csv") 
+    def load_puzzle():
+        p = RushHourPuzzle(0, 0, [], [], [])
+        p.setVehicles("1.csv")
+        return p
 
+    puzzle = load_puzzle()
     search = Search(puzzle)
-    buttons = draw_menu(screen, font)
 
-    while True:
+    hover_index = None
+    running = True
+
+    while running:
+        buttons = draw_menu(screen, font, hover_index)
+        draw_board(screen, puzzle, 350, 50)
+        pygame.display.flip()
+
+        mouse_pos = pygame.mouse.get_pos()
+        hover_index = None
+        for i, (rect, _) in enumerate(buttons):
+            if rect.collidepoint(mouse_pos):
+                hover_index = i
+                break
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                running = False
+                break
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
                 for rect, text in buttons:
-                    if rect.collidepoint(pos):
+                    if rect.collidepoint(mouse_pos):
                         if "BFS" in text:
-                            print("\n===== 🔵 BFS =====")
+                            print("\n=====  BFS =====")
                             sol = search.BFS()
                             if sol:
                                 animate_solution(puzzle, sol)
+
                         elif "h1" in text:
-                            print("\n===== 🟢 A* (h1) =====")
+                            print("\n=====  A* (h1) =====")
                             sol = search.AStar("h1")
                             if sol:
                                 animate_solution(puzzle, sol)
+
                         elif "h2" in text:
-                            print("\n===== 🟠 A* (h2) =====")
+                            print("\n=====  A* (h2) =====")
                             sol = search.AStar("h2")
                             if sol:
                                 animate_solution(puzzle, sol)
+
                         elif "h3" in text:
-                            print("\n===== 🔴 A* (h3) =====")
+                            print("\n=====  A* (h3) =====")
                             sol = search.AStar("h3")
                             if sol:
                                 animate_solution(puzzle, sol)
+
+                        elif "Réinitialiser" in text:
+                            print("\n Réinitialisation du plateau...")
+                            puzzle = load_puzzle()
+                            search = Search(puzzle)
+
                         elif "Quitter" in text:
-                            pygame.quit()
-                            sys.exit()
+                            running = False
+                            break
+
+    pygame.quit()
+    sys.exit()
 
 
 if __name__ == "__main__":
