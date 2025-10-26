@@ -211,7 +211,7 @@ class Search:
 
             if current.state.isGoal():
                 timex = time.time() - start_time
-                print(f"✅ A* ({heuristic}) : solution trouvée en {timex:.4f}s, {counter} étapes explorées")
+                print(f" A* ({heuristic}) : solution trouvée en {timex:.4f}s, {counter} étapes explorées")
                 return current.getSolution()
 
             closed_list.append(current)
@@ -221,8 +221,8 @@ class Search:
                 child.g = current.g + self._cost(current, action, successor)
                 child.f = child.g + self._heuristic(successor, heuristic)
 
-                open_match = self._find_in_list(open_list, child)
-                closed_match = self._find_in_list(closed_list, child)
+                open_match = self._existe(open_list, child)
+                closed_match = self._existe(closed_list, child)
 
                 if not open_match and not closed_match:
                     open_list.append(child)
@@ -237,26 +237,37 @@ class Search:
         return None
 
     def _heuristic(self, state, type="h1"):
-        red = next(v for v in state.vehicles if v["id"] == "X")
-        distance = (state.board_width - 1) - (red["x"] + red["length"] - 1)
+     red = next(v for v in state.vehicles if v["id"] == "X")
 
-        if type == "h1":
-            return distance
-        elif type == "h2":
-            blockers = 0
-            y = red["y"]
-            for x in range(red["x"] + red["length"], state.board_width):
-                if state.board[y][x] != ' ':
-                    blockers += 1
-            return distance + blockers
-        elif type == "h3":
-            blockers = 0
-            y = red["y"]
-            for x in range(red["x"] + red["length"], state.board_width):
-                if state.board[y][x] != ' ':
-                    blockers += 2
-            return distance + blockers
-        return 0
+     distance = (state.board_width - 1) - (red["x"] + red["length"] - 1)
+
+    # === Heuristique h1 : distance simple ===
+     if type == "h1":
+        return distance
+
+    # === Heuristique h2 : distance + nombre de voitures qui bloquent ===
+     elif type == "h2":
+        blockers = 0
+        y = red["y"]
+        for x in range(red["x"] + red["length"], state.board_width):
+            if state.board[y][x] != ' ':
+                blockers += 1
+        return distance + blockers
+
+    # === Heuristique h3 : distance + taille totale des véhicules bloquants ===
+     elif type == "h3":
+        blockers = 0
+        y = red["y"]
+        for x in range(red["x"] + red["length"], state.board_width):
+            if state.board[y][x] != ' ':
+                for v in state.vehicles:
+                    if v["id"] == state.board[y][x]:
+                        blockers += v["length"]  
+                        break
+        return distance + blockers
+
+     return 0
+
 
     def _cost(self, current, action, successor):
         return 1  
@@ -269,7 +280,7 @@ class Search:
                 return True
         return False
 
-    def _find_in_list(self, lst, node):
+    def _existe(self, lst, node):
         for item in lst:
             n = item[2] if isinstance(item, tuple) else item
             if self._same_state(n.state, node.state):
