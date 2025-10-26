@@ -3,12 +3,10 @@ import sys
 import time
 from Rush import RushHourPuzzle, Search
 
-# === PARAMÈTRES D’AFFICHAGE ===
 CELL_SIZE = 80
 MARGIN = 8
 FPS = 2
 
-# === COULEURS ===
 WHITE = (250, 250, 250)
 BLACK = (0, 0, 0)
 GRAY = (210, 210, 210)
@@ -53,7 +51,6 @@ def draw_board(screen, puzzle, offset_x=350, offset_y=50):
                 pygame.draw.rect(screen, color, rect, border_radius=10)
                 pygame.draw.rect(screen, BLACK, rect, 2, border_radius=10)
 
-    # Bordure du plateau
     border_rect = pygame.Rect(
         offset_x + MARGIN - 5,
         offset_y + MARGIN - 5,
@@ -63,12 +60,9 @@ def draw_board(screen, puzzle, offset_x=350, offset_y=50):
     pygame.draw.rect(screen, BLACK, border_rect, 4, border_radius=10)
 
 
-# === MENU LATERAL ===
 def draw_menu(screen, font, hover_index=None):
-    """Affiche les boutons du menu amélioré à gauche."""
     screen.fill(WHITE)
 
-    # Titre
     title = font.render(" Rush Hour Solver", True, BLACK)
     screen.blit(title, (40, 40))
 
