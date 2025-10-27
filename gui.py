@@ -30,9 +30,7 @@ CAR_COLORS = {
 }
 
 
-# === AFFICHAGE DU PLATEAU ===
 def draw_board(screen, puzzle, offset_x=350, offset_y=50):
-    """Dessine le plateau avec décalage à droite."""
     for y in range(puzzle.board_height):
         for x in range(puzzle.board_width):
             rect = pygame.Rect(
@@ -94,7 +92,6 @@ def draw_menu(screen, font, hover_index=None):
 
 
 def animate_solution(puzzle, actions):
-    """Anime la solution et laisse le plateau final affiché."""
     screen_width = 900
     screen_height = 650
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -132,10 +129,9 @@ def animate_solution(puzzle, actions):
         pygame.display.flip()
         clock.tick(FPS)
 
-    print(" Solution terminée ! (Plateau final affiché)")
+    print(" Solution terminée ")
 
 
-# === PROGRAMME PRINCIPAL ===
 def main_gui():
     pygame.init()
     screen = pygame.display.set_mode((900, 650))
@@ -174,25 +170,25 @@ def main_gui():
                 for rect, text in buttons:
                     if rect.collidepoint(mouse_pos):
                         if "BFS" in text:
-                            print("\n=====  BFS =====")
+                            print("\n  BFS ")
                             sol = search.BFS()
                             if sol:
                                 animate_solution(puzzle, sol)
 
                         elif "h1" in text:
-                            print("\n=====  A* (h1) =====")
+                            print("\n A* (h1)")
                             sol = search.AStar("h1")
                             if sol:
                                 animate_solution(puzzle, sol)
 
                         elif "h2" in text:
-                            print("\n=====  A* (h2) =====")
+                            print("\n A* (h2) ")
                             sol = search.AStar("h2")
                             if sol:
                                 animate_solution(puzzle, sol)
 
                         elif "h3" in text:
-                            print("\n=====  A* (h3) =====")
+                            print("\n  A* (h3) ")
                             sol = search.AStar("h3")
                             if sol:
                                 animate_solution(puzzle, sol)

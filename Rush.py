@@ -192,7 +192,7 @@ class Search:
         print(f" Temps d'exécution : {timex:.4f} secondes\n")
         return None
 
-    # ---------- A* ----------
+    #A* 
     def AStar(self, heuristic="h1"):
         start_time = time.time()
         counter = 0
@@ -221,44 +221,42 @@ class Search:
                 child.g = current.g + self._cost(current, action, successor)
                 child.f = child.g + self._heuristic(successor, heuristic)
 
-                open_match = self._existe(open_list, child)
-                closed_match = self._existe(closed_list, child)
+                open2 = self._existe(open_list, child)
+                closed2 = self._existe(closed_list, child)
 
-                if not open_match and not closed_match:
+                if not open2 and not closed2:
                     open_list.append(child)
-                elif open_match and child.f < open_match.f:
-                    open_list.remove(open_match)
+                elif open2 and child.f < open2.f:
+                    open_list.remove(open2)
                     open_list.append(child)
-                elif closed_match and child.f < closed_match.f:
-                    closed_list.remove(closed_match)
+                elif closed2 and child.f < closed2.f:
+                    closed_list.remove(closed2)
                     open_list.append(child)
 
         print(f" Aucune solution trouvée avec A* ({heuristic}) après {counter} étapes")
         return None
 
     def _heuristic(self, state, type="h1"):
-     red = next(v for v in state.vehicles if v["id"] == "X")
+     xcar = next(v for v in state.vehicles if v["id"] == "X")
 
-     distance = (state.board_width - 1) - (red["x"] + red["length"] - 1)
+     distance = (state.board_width - 1) - (xcar["x"] + xcar["length"] - 1)
 
-    # === Heuristique h1 : distance simple ===
      if type == "h1":
         return distance
 
-    # === Heuristique h2 : distance + nombre de voitures qui bloquent ===
+    
      elif type == "h2":
         blockers = 0
-        y = red["y"]
-        for x in range(red["x"] + red["length"], state.board_width):
+        y = xcar["y"]
+        for x in range(xcar["x"] + xcar["length"], state.board_width):
             if state.board[y][x] != ' ':
                 blockers += 1
         return distance + blockers
 
-    # === Heuristique h3 : distance + taille totale des véhicules bloquants ===
      elif type == "h3":
         blockers = 0
-        y = red["y"]
-        for x in range(red["x"] + red["length"], state.board_width):
+        y = xcar["y"]
+        for x in range(xcar["x"] + xcar["length"], state.board_width):
             if state.board[y][x] != ' ':
                 for v in state.vehicles:
                     if v["id"] == state.board[y][x]:
@@ -301,14 +299,14 @@ if __name__ == "__main__":
 
     search = Search(puzzle)
 
-    print("\n=====  BFS =====")
+    print("\n BFS ")
     bfs_solution = search.BFS()
 
-    print("\n=====  A* avec h1 =====")
+    print("\n A* avec h1 ")
     a1_solution = search.AStar("h1")
 
-    print("\n=====  A* avec h2 =====")
+    print("\n A* avec h2 ")
     a2_solution = search.AStar("h2")
 
-    print("\n=====  A* avec h3 =====")
+    print("\n  A* avec h3 ")
     a3_solution = search.AStar("h3")
